@@ -1,0 +1,67 @@
+import React, { useCallback } from 'react'
+import { FC, useState } from 'react'
+import styles from '../styles/Home.module.css'
+import { TxStatus } from './TxStatus'
+import { useWallet } from '@alephium/web3-react'
+import { web3, node, ExplorerProvider } from '@alephium/web3'
+import { MereProofConfig } from '@/services/utils'
+import { anchorHash } from '@/services/mereproof.service'
+import configuration from '../../alephium.config'
+
+
+export const MereProofDapp: FC<{
+  config: MereProofConfig
+}> = ({ config }) => {
+  const { signer, account, explorerProvider } = useWallet()
+  web3.setCurrentNodeProvider(configuration.networks[config.network].nodeUrl)
+
+  const [hash, setHash] = useState('de1ec7ab1e5e1ec7edc0ffee')
+  const [ongoingTxId, setOngoingTxId] = useState<string>()
+
+  const handleHashSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (signer) {
+      const result = await anchorHash(signer, account, hash) 
+      console.log(result)
+      setOngoingTxId(result.txId)
+    }
+  }
+
+  const txStatusCallback = useCallback(
+    async (status: node.TxStatus, numberOfChecks: number): Promise<any> => {
+      if ((status.type === 'Confirmed' && numberOfChecks > 2) || (status.type === 'TxNotFound' && numberOfChecks > 3)) {
+        setOngoingTxId(undefined)
+        console.log(status.type);
+      }
+
+      return Promise.resolve()
+    },
+    [setOngoingTxId]
+  )
+
+  console.log('ongoing..', ongoingTxId)
+  return (
+    <>
+      {ongoingTxId && <TxStatus txId={ongoingTxId} txStatusCallback={txStatusCallback} />}
+
+      <div className="columns">
+        <form onSubmit={handleHashSubmit}>
+          <>
+            <h2 className={styles.title}>Anchor hash on Alephium {config.network}</h2>
+            <p>PublicKey: {account?.publicKey ?? '???'}</p>
+            <label htmlFor="hash">Hash</label>
+            <input
+              type="string"
+              id="hash"
+              name="hash"
+              value={hash}
+              onChange={(e) => setHash(e.target.value)}
+            />
+            <br />
+            <input type="submit" disabled={!!ongoingTxId} value="Anchor hash" />
+          </>
+        </form>
+      </div>
+    </>
+  )
+}

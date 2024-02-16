@@ -1,25 +1,18 @@
 import { NetworkId } from '@alephium/web3'
-import { loadDeployments } from '../../artifacts/ts/deployments'
+// import { loadDeployments } from '../../artifacts/ts/deployments'
 
-export interface TokenFaucetConfig {
+export interface MereProofConfig {
   network: NetworkId
-  groupIndex: number
-  tokenFaucetAddress: string
-  faucetTokenId: string
 }
 
 function getNetwork(): NetworkId {
-  const network = (process.env.NEXT_PUBLIC_NETWORK ?? 'devnet') as NetworkId
+  const network = (process.env.NEXT_PUBLIC_NETWORK ?? 'testnet') as NetworkId
   return network
 }
 
-function getTokenFaucetConfig(): TokenFaucetConfig {
+function getMereProofConfig(): MereProofConfig {
   const network = getNetwork()
-  const tokenFaucet = loadDeployments(network).contracts.TokenFaucet.contractInstance
-  const groupIndex = tokenFaucet.groupIndex
-  const tokenFaucetAddress = tokenFaucet.address
-  const faucetTokenId = tokenFaucet.contractId
-  return { network, groupIndex, tokenFaucetAddress, faucetTokenId }
+  return { network }
 }
 
-export const tokenFaucetConfig = getTokenFaucetConfig()
+export const mereProofConfig = getMereProofConfig()
