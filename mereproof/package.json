@@ -30,6 +30,7 @@
     "trailingComma": "none"
   },
   "dependencies": {
+    "@alephium/get-extension-wallet": "^0.29.3",
     "@alephium/web3": "v0.21.2",
     "@alephium/web3-react": "v0.21.2",
     "@next/font": "13.1.4",
