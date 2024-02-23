@@ -1,6 +1,7 @@
 import React, { useCallback, useRef } from 'react'
 import { useTxStatus } from '@alephium/web3-react'
 import { node } from '@alephium/web3'
+import { useWallet } from '@alephium/web3-react'
 
 interface TxStatusAlertProps {
   txId: string

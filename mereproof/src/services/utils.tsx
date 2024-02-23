@@ -6,7 +6,7 @@ export interface MereProofConfig {
 }
 
 function getNetwork(): NetworkId {
-  const network = (process.env.NEXT_PUBLIC_NETWORK ?? 'testnet') as NetworkId
+  const network = 'testnet' as NetworkId  // (process.env.NEXT_PUBLIC_NETWORK ?? 'devnet') as NetworkId
   return network
 }
 

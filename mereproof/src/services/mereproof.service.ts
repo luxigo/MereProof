@@ -1,5 +1,4 @@
-import { DUST_AMOUNT, NodeProvider, SignerProvider, Account, SignTransferTxResult } from '@alephium/web3'
-import { getDefaultAlephiumWallet } from "@alephium/get-extension-wallet"
+import { DUST_AMOUNT, NodeProvider, ExplorerProvider, SignerProvider, Account, SignTransferTxResult } from '@alephium/web3'
 
 export const anchorHash = async (
   signerProvider: SignerProvider,
@@ -17,4 +16,3 @@ export const anchorHash = async (
     signerAddress: account.address
   })
 }
-
