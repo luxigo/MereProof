@@ -1,27 +1,28 @@
 import React, { useCallback } from 'react'
-import { FC, useState } from 'react'
+import { FC, useState, useEffect } from 'react'
 import styles from '../styles/Home.module.css'
 import { TxStatus } from './TxStatus'
 import { useWallet } from '@alephium/web3-react'
 import { web3, node, ExplorerProvider } from '@alephium/web3'
-import { MereProofConfig } from '@/services/utils'
-import { anchorHash } from '@/services/mereproof.service'
+import { AlephashConfig, alephashConfig } from '@/services/utils'
+import { anchorHash } from '@/services/alephash.service'
 import configuration from '../../alephium.config'
 
 
-export const MereProofDapp: FC<{
-  config: MereProofConfig
+export const AlephashDapp: FC<{
+  config: AlephashConfig
 }> = ({ config }) => {
-  const { signer, account, explorerProvider } = useWallet()
-  web3.setCurrentNodeProvider(configuration.networks[config.network].nodeUrl)
+  const { signer, account, explorerProvider, nodeProvider } = useWallet()
 
   const [hash, setHash] = useState('de1ec7ab1e5e1ec7edc0ffee')
   const [ongoingTxId, setOngoingTxId] = useState<string>()
 
   const handleHashSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (nodeProvider) web3.setCurrentNodeProvider(nodeProvider)
+
     if (signer) {
-      const result = await anchorHash(signer, account, hash) 
+      const result = await anchorHash(signer, account, hash)
       console.log(result)
       setOngoingTxId(result.txId)
     }
@@ -56,9 +57,10 @@ export const MereProofDapp: FC<{
               name="hash"
               value={hash}
               onChange={(e) => setHash(e.target.value)}
+              disabled={alephashConfig.slave || !!ongoingTxId}
             />
             <br />
-            <input type="submit" disabled={!!ongoingTxId} value="Anchor hash" />
+            {alephashConfig.slave || <input type="submit" disabled={!!ongoingTxId} value="Anchor hash" />}
           </>
         </form>
       </div>

@@ -1,18 +1,23 @@
 import { NetworkId } from '@alephium/web3'
-// import { loadDeployments } from '../../artifacts/ts/deployments'
 
-export interface MereProofConfig {
+export interface AlephashConfig {
   network: NetworkId
+  showUI: boolean
+  slave: boolean
 }
 
 function getNetwork(): NetworkId {
-  const network = (process.env.NEXT_PUBLIC_NETWORK ?? 'testnet') as NetworkId
+  const network = (process.env.NEXT_PUBLIC_NETWORK ?? 'devnet') as NetworkId
   return network
 }
 
-function getMereProofConfig(): MereProofConfig {
+function getAlephashConfig(): AlephashConfig {
   const network = getNetwork()
-  return { network }
+  const showUI = false
+  const slave = true
+  return { network, showUI, slave }
 }
 
-export const mereProofConfig = getMereProofConfig()
+export const glob: any={}
+
+export const alephashConfig = getAlephashConfig()
