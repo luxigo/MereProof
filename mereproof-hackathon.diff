@@ -1,0 +1,581 @@
+diff --git a/README.md b/README.md
+index f415365..5abf3c7 100644
+--- a/README.md
++++ b/README.md
+@@ -1,21 +1,11 @@
+-# MereProof
+-Mer(kl)e proof (of existence) - compute the merkle root for a set of files and store its value on the Alephium blockchain, so that it can be proven all those documents were existing at the time the transaction was done while minimizing the blockchain space needed
++# Alephash
++Anchor a hash on Alephium blockchain
+ 
+ ## Description
+-For each file in the merkle tree  a "proof file" has to be generated, to associate its hash with the metadata needed to verify the file is belonging to the tree. 
+-
+-Then the existence of each individual file at the time of the blockchain transaction can be validated using its associated proof.
+-
+-I've been working previously on https://merklizer.xyz/ (6 years ago), a similar static plain JS dApp project aiming ETH and BTC blockchains.
+-
+-I intend to start from scratch with Alephium/NextJS
+-
+-However I could refactor some of merklizer, eg. the merkle tree computation/verification plain JS code (that was implemented primarly as an AngularJS service).
+-
+-Contributors welcome !
++Send a transaction to self to store a hash on the blockchain
+ 
+ ## License
+-This project is licensed under AGPLv3.0 or later, see https://github.com/luxigo/MereProof/blob/main/LICENSE
++This project is licensed under AGPLv3.0 or later, see https://github.com/luxigo/Alephash/blob/main/LICENSE
+ 
+ ## Contact
+ You can contact me on Discord or by mail at luc.deschenaux@freesuf.ch
+diff --git a/mereproof/contracts/token.ral b/mereproof/contracts/token.ral
+deleted file mode 100644
+index 580e5b5..0000000
+--- a/mereproof/contracts/token.ral
++++ /dev/null
+@@ -1,69 +0,0 @@
+-import "std/fungible_token_interface"
+-
+-// Defines a contract named `TokenFaucet`.
+-// A contract is a collection of fields (its state) and functions.
+-// Once deployed, a contract resides at a specific address on the Alephium blockchain.
+-// Contract fields are permanently stored in contract storage.
+-// A contract can issue an initial amount of token at its deployment.
+-Contract TokenFaucet(
+-    symbol: ByteVec,
+-    name: ByteVec,
+-    decimals: U256,
+-    supply: U256,
+-    mut balance: U256
+-) implements IFungibleToken {
+-
+-    // Events allow for logging of activities on the blockchain.
+-    // Alephium clients can listen to events in order to react to contract state changes.
+-    event Withdraw(to: Address, amount: U256)
+-
+-    enum ErrorCodes {
+-        InvalidWithdrawAmount = 0
+-    }
+-
+-    // A public function that returns the initial supply of the contract's token.
+-    // Note that the field must be initialized as the amount of the issued token.
+-    pub fn getTotalSupply() -> U256 {
+-        return supply
+-    }
+-
+-    // A public function that returns the symbol of the token.
+-    pub fn getSymbol() -> ByteVec {
+-        return symbol
+-    }
+-
+-    // A public function that returns the name of the token.
+-    pub fn getName() -> ByteVec {
+-        return name
+-    }
+-
+-    // A public function that returns the decimals of the token.
+-    pub fn getDecimals() -> U256 {
+-        return decimals
+-    }
+-
+-    // A public function that returns the current balance of the contract.
+-    pub fn balance() -> U256 {
+-        return balance
+-    }
+-
+-    // A public function that transfers tokens to anyone who calls it.
+-    // The function is annotated with `updateFields = true` as it changes the contract fields.
+-    // The function is annotated as using contract assets as it does.
+-    // The function is annotated with `checkExternalCaller = false` as there is no need to check the external caller.
+-    @using(assetsInContract = true, updateFields = true, checkExternalCaller = false)
+-    pub fn withdraw(amount: U256) -> () {
+-        // Debug events can be helpful for error analysis
+-        emit Debug(`The current balance is ${balance}`)
+-
+-        // Make sure the amount is valid
+-        assert!(amount <= 2, ErrorCodes.InvalidWithdrawAmount)
+-        // Functions postfixed with `!` are built-in functions.
+-        transferTokenFromSelf!(callerAddress!(), selfTokenId!(), amount)
+-        // Ralph does not allow underflow.
+-        balance = balance - amount
+-
+-        // Emit the event defined earlier.
+-        emit Withdraw(callerAddress!(), amount)
+-    }
+-}
+diff --git a/mereproof/contracts/withdraw.ral b/mereproof/contracts/withdraw.ral
+deleted file mode 100644
+index c54ba1a..0000000
+--- a/mereproof/contracts/withdraw.ral
++++ /dev/null
+@@ -1,8 +0,0 @@
+-// Defines a transaction script.
+-// A transaction script is a piece of code to interact with contracts on the blockchain.
+-// Transaction scripts can use the input assets of transactions in general.
+-// A script is disposable and will only be executed once along with the holder transaction.
+-TxScript Withdraw(token: TokenFaucet, amount: U256) {
+-    // Call token contract's withdraw function.
+-    token.withdraw(amount)
+-}
+diff --git a/mereproof/next.config.js b/mereproof/next.config.js
+index 3c0e22e..2565ba7 100644
+--- a/mereproof/next.config.js
++++ b/mereproof/next.config.js
+@@ -1,6 +1,8 @@
+ /** @type {import('next').NextConfig} */
+ const nextConfig = {
+   reactStrictMode: true,
++  output: "standalone",
++  productionBrowserSourceMaps: true,
+   webpack: (config, { isServer }) => {
+     if (!isServer) {
+       config.resolve.fallback.fs = false
+diff --git a/mereproof/scripts/0_deploy_faucet.ts b/mereproof/scripts/0_deploy_faucet.ts
+deleted file mode 100644
+index 3d1fa6f..0000000
+--- a/mereproof/scripts/0_deploy_faucet.ts
++++ /dev/null
+@@ -1,29 +0,0 @@
+-import { Deployer, DeployFunction, Network } from '@alephium/cli'
+-import { Settings } from '../alephium.config'
+-import { TokenFaucet } from '../artifacts/ts'
+-
+-// This deploy function will be called by cli deployment tool automatically
+-// Note that deployment scripts should prefixed with numbers (starting from 0)
+-const deployFaucet: DeployFunction<Settings> = async (
+-  deployer: Deployer,
+-  network: Network<Settings>
+-): Promise<void> => {
+-  // Get settings
+-  const issueTokenAmount = network.settings.issueTokenAmount
+-  const result = await deployer.deployContract(TokenFaucet, {
+-    // The amount of token to be issued
+-    issueTokenAmount: issueTokenAmount,
+-    // The initial states of the faucet contract
+-    initialFields: {
+-      symbol: Buffer.from('TF', 'utf8').toString('hex'),
+-      name: Buffer.from('TokenFaucet', 'utf8').toString('hex'),
+-      decimals: 0n,
+-      supply: issueTokenAmount,
+-      balance: issueTokenAmount
+-    }
+-  })
+-  console.log('Token faucet contract id: ' + result.contractInstance.contractId)
+-  console.log('Token faucet contract address: ' + result.contractInstance.address)
+-}
+-
+-export default deployFaucet
+diff --git a/mereproof/src/components/AlephashDapp.tsx b/mereproof/src/components/AlephashDapp.tsx
+new file mode 100644
+index 0000000..7ccc07f
+--- /dev/null
++++ b/mereproof/src/components/AlephashDapp.tsx
+@@ -0,0 +1,69 @@
++import React, { useCallback } from 'react'
++import { FC, useState, useEffect } from 'react'
++import styles from '../styles/Home.module.css'
++import { TxStatus } from './TxStatus'
++import { useWallet } from '@alephium/web3-react'
++import { web3, node, ExplorerProvider } from '@alephium/web3'
++import { AlephashConfig, alephashConfig } from '@/services/utils'
++import { anchorHash } from '@/services/alephash.service'
++import configuration from '../../alephium.config'
++
++
++export const AlephashDapp: FC<{
++  config: AlephashConfig
++}> = ({ config }) => {
++  const { signer, account, explorerProvider, nodeProvider } = useWallet()
++
++  const [hash, setHash] = useState('de1ec7ab1e5e1ec7edc0ffee')
++  const [ongoingTxId, setOngoingTxId] = useState<string>()
++
++  const handleHashSubmit = async (e: React.FormEvent) => {
++    e.preventDefault()
++    if (nodeProvider) web3.setCurrentNodeProvider(nodeProvider)
++
++    if (signer) {
++      const result = await anchorHash(signer, account, hash)
++      console.log(result)
++      setOngoingTxId(result.txId)
++    }
++  }
++
++  const txStatusCallback = useCallback(
++    async (status: node.TxStatus, numberOfChecks: number): Promise<any> => {
++      if ((status.type === 'Confirmed' && numberOfChecks > 2) || (status.type === 'TxNotFound' && numberOfChecks > 3)) {
++        setOngoingTxId(undefined)
++        console.log(status.type);
++      }
++
++      return Promise.resolve()
++    },
++    [setOngoingTxId]
++  )
++
++  console.log('ongoing..', ongoingTxId)
++  return (
++    <>
++      {ongoingTxId && <TxStatus txId={ongoingTxId} txStatusCallback={txStatusCallback} />}
++
++      <div className="columns">
++        <form onSubmit={handleHashSubmit}>
++          <>
++            <h2 className={styles.title}>Anchor hash on Alephium {config.network}</h2>
++            <p>PublicKey: {account?.publicKey ?? '???'}</p>
++            <label htmlFor="hash">Hash</label>
++            <input
++              type="string"
++              id="hash"
++              name="hash"
++              value={hash}
++              onChange={(e) => setHash(e.target.value)}
++              disabled={alephashConfig.slave || !!ongoingTxId}
++            />
++            <br />
++            {alephashConfig.slave || <input type="submit" disabled={!!ongoingTxId} value="Anchor hash" />}
++          </>
++        </form>
++      </div>
++    </>
++  )
++}
+diff --git a/mereproof/src/components/TokenDapp.tsx b/mereproof/src/components/TokenDapp.tsx
+deleted file mode 100644
+index d247b1b..0000000
+--- a/mereproof/src/components/TokenDapp.tsx
++++ /dev/null
+@@ -1,79 +0,0 @@
+-import React, { useCallback } from 'react'
+-import { FC, useState } from 'react'
+-import styles from '../styles/Home.module.css'
+-import { withdrawToken } from '@/services/token.service'
+-import { TxStatus } from './TxStatus'
+-import { useWallet } from '@alephium/web3-react'
+-import { node } from '@alephium/web3'
+-import { TokenFaucetConfig } from '@/services/utils'
+-
+-export const TokenDapp: FC<{
+-  config: TokenFaucetConfig
+-}> = ({ config }) => {
+-  const { signer, account } = useWallet()
+-  const addressGroup = config.groupIndex
+-  const [withdrawAmount, setWithdrawAmount] = useState('')
+-  const [ongoingTxId, setOngoingTxId] = useState<string>()
+-
+-  const handleWithdrawSubmit = async (e: React.FormEvent) => {
+-    e.preventDefault()
+-    if (signer) {
+-      const result = await withdrawToken(signer, withdrawAmount, config.faucetTokenId)
+-      setOngoingTxId(result.txId)
+-    }
+-  }
+-
+-  const txStatusCallback = useCallback(
+-    async (status: node.TxStatus, numberOfChecks: number): Promise<any> => {
+-      if ((status.type === 'Confirmed' && numberOfChecks > 2) || (status.type === 'TxNotFound' && numberOfChecks > 3)) {
+-        setOngoingTxId(undefined)
+-      }
+-
+-      return Promise.resolve()
+-    },
+-    [setOngoingTxId]
+-  )
+-
+-  console.log('ongoing..', ongoingTxId)
+-  return (
+-    <>
+-      {ongoingTxId && <TxStatus txId={ongoingTxId} txStatusCallback={txStatusCallback} />}
+-
+-      <div className="columns">
+-        <form onSubmit={handleWithdrawSubmit}>
+-          <>
+-            <h2 className={styles.title}>Alephium Token Faucet on {config.network}</h2>
+-            <p>PublicKey: {account?.publicKey ?? '???'}</p>
+-            <p>Maximum 2 tokens can be withdrawn at a time.</p>
+-            <table>
+-              <thead>
+-                <tr>
+-                  <td>id</td>
+-                  <th>group</th>
+-                </tr>
+-              </thead>
+-              <tbody>
+-                <tr key={addressGroup} style={{ background: 'red', color: 'white' }}>
+-                  <td>{config.faucetTokenId}</td>
+-                  <td>{addressGroup}</td>
+-                </tr>
+-              </tbody>
+-            </table>
+-            <label htmlFor="withdraw-amount">Amount</label>
+-            <input
+-              type="number"
+-              id="transfer-amount"
+-              name="amount"
+-              max="2"
+-              min="1"
+-              value={withdrawAmount}
+-              onChange={(e) => setWithdrawAmount(e.target.value)}
+-            />
+-            <br />
+-            <input type="submit" disabled={!!ongoingTxId} value="Send Me Token" />
+-          </>
+-        </form>
+-      </div>
+-    </>
+-  )
+-}
+diff --git a/mereproof/src/pages/_app.tsx b/mereproof/src/pages/_app.tsx
+index 0920d8e..d6358e8 100644
+--- a/mereproof/src/pages/_app.tsx
++++ b/mereproof/src/pages/_app.tsx
+@@ -2,14 +2,13 @@ import React from 'react'
+ import '@/styles/globals.css'
+ import type { AppProps } from 'next/app'
+ import { AlephiumWalletProvider } from '@alephium/web3-react'
+-import { tokenFaucetConfig } from '@/services/utils'
++import { alephashConfig } from '@/services/utils'
+ 
+ export default function App({ Component, pageProps }: AppProps) {
+   return (
+     <AlephiumWalletProvider
+-      theme="web95"
+-      network={tokenFaucetConfig.network}
+-      addressGroup={tokenFaucetConfig.groupIndex}
++      //theme="web95"
++      network={alephashConfig.network}
+     >
+       <Component {...pageProps} />
+     </AlephiumWalletProvider>
+diff --git a/mereproof/src/pages/index.tsx b/mereproof/src/pages/index.tsx
+index baa16ec..ef7ae6e 100644
+--- a/mereproof/src/pages/index.tsx
++++ b/mereproof/src/pages/index.tsx
+@@ -1,25 +1,94 @@
+-import React from 'react'
++import React, { useEffect } from 'react'
+ import Head from 'next/head'
+ import styles from '@/styles/Home.module.css'
+-import { TokenDapp } from '@/components/TokenDapp'
++import { AlephashDapp } from '@/components/AlephashDapp'
+ import { AlephiumConnectButton, useWallet } from '@alephium/web3-react'
+-import { tokenFaucetConfig } from '@/services/utils'
++import { alephashConfig } from '@/services/utils'
++import { anchorHash } from '@/services/alephash.service'
++import { SignTransferTxResult } from '@alephium/web3'
++import { web3 } from '@alephium/web3'
+ 
++interface AnchorHashReply {
++  type: string,
++  hash: string,
++  error?: string,
++  txResult?: string
++}
+ export default function Home() {
+-  const { connectionStatus } = useWallet()
++
++  useEffect(() => {
++    if (window && window.focus) window.focus();
++    if (window && window.parent && (window.parent as any).alephashLoaded) { // should be window.frameElement but it's undefined
++      console.log((window.parent as any).alephashLoaded())
++    }
++  }, [])
++
++  const { connectionStatus, signer, account, nodeProvider } = useWallet()
++
++  useEffect(() => {
++    function handleMessage(msg: any) {
++      if (msg.origin != window.document.location.origin) {
++        console.log('rejected message from ' + msg.origin, msg);
++        return;
++      }
++      if (msg.data && msg.data.type) {
++        switch (msg.data.type) {
++          case "alph.anchorHash":
++            {
++              const reply: AnchorHashReply = { type: "alph.anchorHashReply", hash: msg.data.hash };
++              if (nodeProvider) web3.setCurrentNodeProvider(nodeProvider)
++              if (connectionStatus !== "connected") {
++                reply.error = "Not connected to Alephium."
++                window.parent && window.parent.postMessage(reply)
++              } else {
++                window.focus();
++                anchorHash(signer, account, msg.data.hash)
++                  .then((result: SignTransferTxResult) => {
++                    reply.txResult = JSON.stringify(result);
++                    window.parent && window.parent.postMessage(reply)
++                  })
++                  .catch((err) => {
++                    console.log(err)
++                    reply.error = err.message;
++                    window.parent && window.parent.postMessage(reply)
++                  })
++              }
++            }
++            break
++          default:
++            console.log('unhandled message:', msg);
++            break
++        }
++      }
++    }
++    window.addEventListener('message', handleMessage);
++
++    window.parent && window.parent.postMessage({ type: "alph.ready" })
++
++    return () => {
++      window.removeEventListener('message', handleMessage);
++    };
++  }, [connectionStatus, signer, account, nodeProvider]);
++
++  useEffect(() => {
++    if (window.parent) {
++      window.parent.postMessage({ type: 'alph.connectionStatus', status: connectionStatus });
++    }
++  }, [connectionStatus]);
+ 
+   return (
+     <>
+       <div className={styles.container}>
+-        <AlephiumConnectButton />
+-        <Head>
+-          <title>Token Faucet</title>
+-          <meta name="description" content="Generated by @alephium/cli init" />
+-          <meta name="viewport" content="width=device-width, initial-scale=1" />
+-          <link rel="icon" href="/favicon.ico" />
+-        </Head>
+-
+-        {connectionStatus === 'connected' && <TokenDapp config={tokenFaucetConfig} />}
++        <div id="alephiumConnectButton"><AlephiumConnectButton /></div>
++        {alephashConfig.showUI &&
++          <Head>
++            <title>Alephash</title>
++            <meta name="description" content="Anchor a hash on Alephium" />
++            <meta name="viewport" content="width=device-width, initial-scale=1" />
++            <link rel="icon" href="/favicon.ico" />
++          </Head>
++        }
++        {alephashConfig.showUI && <AlephashDapp config={alephashConfig} />}
+       </div>
+     </>
+   )
+diff --git a/mereproof/src/services/alephash.service.tsx b/mereproof/src/services/alephash.service.tsx
+new file mode 100644
+index 0000000..fb54ba1
+--- /dev/null
++++ b/mereproof/src/services/alephash.service.tsx
+@@ -0,0 +1,37 @@
++import { DUST_AMOUNT, NodeProvider, SignerProvider, Account, SignTransferTxResult } from '@alephium/web3'
++import { getDefaultAlephiumWallet } from "@alephium/get-extension-wallet"
++
++export const anchorHash = async (
++  signerProvider: SignerProvider,
++  account: Account,
++  hash: string,
++): Promise<SignTransferTxResult> => {
++
++  if (!hash.match(/^[0-9a-f]+$/i)) {
++    throw new Error('Hash must be a hexadecimal string.')
++  }
++
++  console.log("Tx", {
++    destinations: [
++      {
++        address: account.address,
++        attoAlphAmount: DUST_AMOUNT,
++        message: hash
++      }
++    ],
++    signerAddress: account.address
++  })
++
++  return await signerProvider.signAndSubmitTransferTx({
++    destinations: [
++      {
++        address: account.address,
++        attoAlphAmount: DUST_AMOUNT,
++        message: hash
++      }
++    ],
++    signerAddress: account.address
++  })
++}
++
++
+diff --git a/mereproof/src/services/token.service.ts b/mereproof/src/services/token.service.ts
+deleted file mode 100644
+index fcdc028..0000000
+--- a/mereproof/src/services/token.service.ts
++++ /dev/null
+@@ -1,16 +0,0 @@
+-import { DUST_AMOUNT, ExecuteScriptResult, SignerProvider } from '@alephium/web3'
+-import { Withdraw } from '../../artifacts/ts/scripts'
+-
+-export const withdrawToken = async (
+-  signerProvider: SignerProvider,
+-  amount: string,
+-  tokenId: string
+-): Promise<ExecuteScriptResult> => {
+-  return await Withdraw.execute(signerProvider, {
+-    initialFields: {
+-      token: tokenId,
+-      amount: BigInt(amount)
+-    },
+-    attoAlphAmount: DUST_AMOUNT
+-  })
+-}
+diff --git a/mereproof/src/services/utils.tsx b/mereproof/src/services/utils.tsx
+index 01b95a1..38be7f2 100644
+--- a/mereproof/src/services/utils.tsx
++++ b/mereproof/src/services/utils.tsx
+@@ -1,11 +1,9 @@
+ import { NetworkId } from '@alephium/web3'
+-import { loadDeployments } from '../../artifacts/ts/deployments'
+ 
+-export interface TokenFaucetConfig {
++export interface AlephashConfig {
+   network: NetworkId
+-  groupIndex: number
+-  tokenFaucetAddress: string
+-  faucetTokenId: string
++  showUI: boolean
++  slave: boolean
+ }
+ 
+ function getNetwork(): NetworkId {
+@@ -13,13 +11,13 @@ function getNetwork(): NetworkId {
+   return network
+ }
+ 
+-function getTokenFaucetConfig(): TokenFaucetConfig {
++function getAlephashConfig(): AlephashConfig {
+   const network = getNetwork()
+-  const tokenFaucet = loadDeployments(network).contracts.TokenFaucet.contractInstance
+-  const groupIndex = tokenFaucet.groupIndex
+-  const tokenFaucetAddress = tokenFaucet.address
+-  const faucetTokenId = tokenFaucet.contractId
+-  return { network, groupIndex, tokenFaucetAddress, faucetTokenId }
++  const showUI = false
++  const slave = true
++  return { network, showUI, slave }
+ }
+ 
+-export const tokenFaucetConfig = getTokenFaucetConfig()
++export const glob: any={}
++
++export const alephashConfig = getAlephashConfig()
+diff --git a/mereproof/src/styles/globals.css b/mereproof/src/styles/globals.css
+index 4a7390b..4122f47 100644
+--- a/mereproof/src/styles/globals.css
++++ b/mereproof/src/styles/globals.css
+@@ -2,6 +2,10 @@
+   box-sizing: border-box;
+ }
+ 
++input#hash {
++  width: 100%;
++}
++
+ .columns {
+   display: flex;
+   grid-template-columns: 1fr 1fr;
