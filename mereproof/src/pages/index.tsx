@@ -8,7 +8,7 @@ import { anchorHash } from '@/services/alephash.service'
 import { SignTransferTxResult } from '@alephium/web3'
 import { web3 } from '@alephium/web3'
 
-interface AnchorHashReply {
+interface AnchorHashCallback {
   type: string,
   hash: string,
   error?: string,
@@ -35,10 +35,13 @@ export default function Home() {
         switch (msg.data.type) {
           case "alph.anchorHash":
             {
-              const reply: AnchorHashReply = { type: "alph.anchorHashReply", hash: msg.data.hash };
+              const reply: AnchorHashCallback = {
+                type: "alph.anchorHashCallback",
+                hash: msg.data.hash
+              };
               if (nodeProvider) web3.setCurrentNodeProvider(nodeProvider)
               if (connectionStatus !== "connected") {
-                reply.error = "Not connected to Alephium."
+                reply.error = "E_NOTCONNECTED"
                 window.parent && window.parent.postMessage(reply)
               } else {
                 window.focus();
@@ -63,7 +66,15 @@ export default function Home() {
     }
     window.addEventListener('message', handleMessage);
 
-    window.parent && window.parent.postMessage({ type: "alph.ready" })
+    window.parent && window.parent.postMessage({
+       type: "alph.state",
+       data: {
+        connectionStatus: connectionStatus,
+        signer: JSON.stringify(signer),
+        account: JSON.stringify(account),
+        nodeProvider: JSON.stringify(nodeProvider)
+       }
+    })
 
     return () => {
       window.removeEventListener('message', handleMessage);
