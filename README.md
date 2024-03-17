@@ -25,7 +25,7 @@ Header X-Frame-Options must be set to SAMEORIGIN on the server.
 ## Static Page Live Demo (using testnet)
 Note: No files are uploaded, they are processed in the browser.
 
-https://miprosoft.com/hackathon
+The live demo is online here: https://miprosoft.com/hackathon
 
 Test data for validation is available at https://miprosoft.com/elephant.zip (unpack the content and drop it in the validation panel).
 
