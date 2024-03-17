@@ -11,6 +11,8 @@ This project ended as a PoC of "Using Alephium wallet (React/NextJS/TS) from Ang
 
 As part of the hackathon, the worfklow for anchoring hashes, building and verifying proofs anchored on Alephium (using this project from AngularJS 1.8.2) was implemented in project Merklizer (branch hackathon): https://github.com/luxigo/merklizer/tree/hackathon
 
+You can see the diff here https://github.com/alsenet-labs/merklizer/compare/master...luxigo:merklizer:hackathon.patch
+
 
 ## Build
 For example:
