@@ -5,7 +5,7 @@ Given the lack of a pure JS implementation or a pure JS interface to the Alephiu
 
 After a week of "deep learning", and among other things I had tweaked the TS/React/NextJS Alephium TokenFaucet template to anchor hashes instead (branch alephash), https://github.com/luxigo/MereProof/tree/alephash 
 
-Also, seeing how to export the app as a static page with (“npm run export” and some “standalone” setting in the config), binding Merklizer with this project using some windowEvent glue handlers and UseEffect() appeared feasible.
+Also, seeing how to export the app as a static page with “npm run export”, binding Merklizer with this project using some windowEvent glue handlers and UseEffect() appeared feasible.
 
 This project ended as a "MereProof of Concept" of "Using Alephium wallet (React/NextJS/TS) from AngularJS 1.8.3 in pure JS" meant to run in an iframe.
 
