@@ -11,7 +11,7 @@ At the end of the hackathon this project ended as a "MereProof of Concept" of "U
 
 As part of the hackathon, the worfklow for anchoring hashes, building and verifying proofs anchored on Alephium (using this project from AngularJS 1.8.3 was implemented in project Merklizer (branch hackathon): https://github.com/luxigo/merklizer/tree/hackathon  (more exactly here: https://github.com/luxigo/merklizer/tree/hackathon/webapp/client/app)
 
-You can see what was written during the hackaton in this parent project with eg: "git diff origin/hackathon -b" or with https://github.com/alsenet-labs/merklizer/compare/master...luxigo:merklizer:hackathon.patch
+You can see what was written during the hackaton in this parent project to reach to inital goal with eg: "git diff origin/hackathon -b" or with https://github.com/alsenet-labs/merklizer/compare/master...luxigo:merklizer:hackathon.patch
 
 
 ## Build
