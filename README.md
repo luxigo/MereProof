@@ -1,17 +1,17 @@
 # MereProof
 The initial goal of this hackathon project was to add Alephium support to the static webpage project https://github.com/luxigo/merklizer (which is used in https://merklizer.xyz)
 
-Given the lack of a pure JS implementation or a pure JS interface to the Alephium libraries, it was needed (a priori) to deal with TypeScript, React and NextJS and refactor Merklizer into "MereProof" despite my zero-knowledge or TS/React/NextJS.
+Given the lack of a pure JS implementation or a pure JS interface to the Alephium libraries, it was needed (a priori) to refactor Merklizer into "MereProof" but I had zero-knowledge of TS/React/NextJS.
 
 After a week of "deep learning", and among other things I had tweaked the TS/React/NextJS Alephium TokenFaucet template to anchor hashes instead (branch alephash), https://github.com/luxigo/MereProof/tree/alephash 
 
-Also, seeing how to export the app as a static page with “npm run export”, binding Merklizer with this project using some windowEvent glue handlers and UseEffect() appeared feasible.
+Also, seeing how to export the app as a static page with “npm run export”, binding Merklizer with this project using some windowEvent glue handlers and UseEffect() appeared feasible in the remaining time.
 
 At the end of the hackathon this project ended as a "MereProof of Concept" of "Using Alephium wallet (React/NextJS/TS) from AngularJS 1.8.3 in pure JS" meant to run in an iframe.
 
 As part of the hackathon, the worfklow for anchoring hashes, building and verifying proofs anchored on Alephium (using this project from AngularJS 1.8.3 was implemented in project Merklizer (branch hackathon): https://github.com/luxigo/merklizer/tree/hackathon  (more exactly here: https://github.com/luxigo/merklizer/tree/hackathon/webapp/client/app)
 
-You can see what was written during the hackaton in this parent project to reach to inital goal with eg: "git diff origin/hackathon -b" or with https://github.com/alsenet-labs/merklizer/compare/master...luxigo:merklizer:hackathon.patch
+You can see what was written during the hackaton in this parent project to reach the initial goal with eg: "git diff origin/hackathon -b" or with https://github.com/alsenet-labs/merklizer/compare/master...luxigo:merklizer:hackathon.patch
 
 
 ## Build
