@@ -3,7 +3,7 @@ The initial goal of this hackathon project was to add Alephium support to the st
 
 Given the lack of a pure JS implementation or a pure JS interface to the Alephium libraries, it was needed (a priori) to deal with TypeScript, React and NextJS and refactor Merklizer into "MereProof" despite my zero-knowledge or TS/React/NextJS.
 
-After a week of "deep learning", and among other things I had tweaked the TS/React/NextJS TokenFaucet template to anchor hashes instead (branch alephash), https://github.com/luxigo/MereProof/commit/1d415a00b868cd3ad3f6d104d6feadc0216e402d
+After a week of "deep learning", and among other things I had tweaked the TS/React/NextJS Alephium TokenFaucet template to anchor hashes instead (branch alephash), https://github.com/luxigo/MereProof/commit/1d415a00b868cd3ad3f6d104d6feadc0216e402d
 
 Also, seeing how to export the app as a static page with (“npm run export” and some “standalone” setting in the config), binding Merklizer with this project using some windowEvent glue handlers and UseEffect() appeared feasible.
 
