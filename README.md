@@ -25,9 +25,11 @@ Header X-Frame-Options must be set to SAMEORIGIN on the server.
 ## Static Page Live Demo (using testnet)
 Note: No files are uploaded, they are processed in the browser.
 
-The live demo is online here: https://miprosoft.com/hackathon (the source code is here: https://github.com/luxigo/merklizer/tree/hackathon/webapp/client/app)
+The live demo is online here: https://miprosoft.com/hackathon
 
 Test data for validation is available at https://miprosoft.com/elephant.zip (unpack the content and drop it in the validation panel).
+
+The source code for the demo is here: https://github.com/luxigo/merklizer/tree/hackathon/webapp/client/app
 
 ## License
 This project is licensed under AGPLv3.0 or later, see https://github.com/luxigo/MereProof/blob/main/LICENSE
