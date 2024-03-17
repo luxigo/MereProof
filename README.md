@@ -7,7 +7,7 @@ After a week of "deep learning", and among other things I had tweaked the TS/Rea
 
 Also, seeing how to export the app as a static page with (“npm run export” and some “standalone” setting in the config), binding Merklizer with this project using some windowEvent glue handlers and UseEffect() appeared feasible.
 
-This project ended as a PoC of "Using Alephium wallet (React/NextJS/TS) from AngularJS 1.8.2 in pure JS" meant to run in an iframe.
+This project ended as a "MereProof of Concept" of "Using Alephium wallet (React/NextJS/TS) from AngularJS 1.8.2 in pure JS" meant to run in an iframe.
 
 As part of the hackathon, the worfklow for anchoring hashes, building and verifying proofs anchored on Alephium (using this project from AngularJS 1.8.2) was implemented in project Merklizer (branch hackathon): https://github.com/luxigo/merklizer/tree/hackathon
 
