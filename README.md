@@ -9,7 +9,7 @@ Also, seeing how to export the app as a static page with “npm run export”, b
 
 At the end of the hackathon this project ended as a "MereProof of Concept" of "Using Alephium wallet (React/NextJS/TS) from AngularJS 1.8.3 in pure JS" meant to run in an iframe.
 
-As part of the hackathon, the worfklow for anchoring hashes, building and verifying proofs anchored on Alephium (using this project from AngularJS 1.8.3 was implemented in project Merklizer (branch hackathon): https://github.com/luxigo/merklizer/tree/hackathon  (more exactly here: https://github.com/luxigo/merklizer/tree/hackathon/webapp/client/app)
+As part of the hackathon, the worfklow for anchoring hashes, building and verifying proofs anchored on Alephium (using this project as a child project) was implemented in project Merklizer (branch hackathon): https://github.com/luxigo/merklizer/tree/hackathon  (more exactly here: https://github.com/luxigo/merklizer/tree/hackathon/webapp/client/app)
 
 You can see what was written during the hackaton in this parent project to reach the initial goal with eg: "git diff origin/hackathon -b" or with https://github.com/alsenet-labs/merklizer/compare/master...luxigo:merklizer:hackathon.patch
 
