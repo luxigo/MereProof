@@ -9,11 +9,9 @@ Also, seeing how to export the app as a static page with (“npm run export” a
 
 This project ended as a "MereProof of Concept" of "Using Alephium wallet (React/NextJS/TS) from AngularJS 1.8.2 in pure JS" meant to run in an iframe.
 
-As part of the hackathon, the worfklow for anchoring hashes, building and verifying proofs anchored on Alephium (using this project from AngularJS 1.8.2) was implemented in project Merklizer (branch hackathon): https://github.com/luxigo/merklizer/tree/hackathon
+As part of the hackathon, the worfklow for anchoring hashes, building and verifying proofs anchored on Alephium (using this project from AngularJS 1.8.2) was implemented in project Merklizer (branch hackathon): https://github.com/luxigo/merklizer/tree/hackathon  (more exactly here: https://github.com/luxigo/merklizer/tree/hackathon/webapp/client/app)
 
-You can see the diff here https://github.com/alsenet-labs/merklizer/compare/master...luxigo:merklizer:hackathon.patch
-
-(or with colors and ignoring identation changes with eg: "git diff origin/hackathon -b")
+You can see what was written during the hackaton with eg: "git diff origin/hackathon -b"
 
 
 ## Build
@@ -32,8 +30,6 @@ Note: No files are uploaded, they are processed in the browser.
 The live demo is online here: https://miprosoft.com/hackathon
 
 Test data for validation is available at https://miprosoft.com/elephant.zip (unpack the content and drop it in the validation panel).
-
-The source code for the demo is here: https://github.com/luxigo/merklizer/tree/hackathon/webapp/client/app
 
 ## License
 This project is licensed under AGPLv3.0 or later, see https://github.com/luxigo/MereProof/blob/main/LICENSE
