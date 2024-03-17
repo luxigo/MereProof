@@ -1,5 +1,5 @@
 # MereProof
-The initial goal of this hackathon project was to add Alephium support to the static webpage project https://github.com/luxigo/merklizer (whis is used in https://merklizer.xyz)
+The initial goal of this hackathon project was to add Alephium support to the static webpage project https://github.com/luxigo/merklizer (which is used in https://merklizer.xyz)
 
 Given the lack of a pure JS implementation or a pure JS interface to the Alephium libraries, it was needed (a priori) to deal with TypeScript, React and NextJS and refactor Merklizer into "MereProof" despite my zero-knowledge or TS/React/NextJS.
 
